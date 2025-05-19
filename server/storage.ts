@@ -7,6 +7,21 @@ import {
   complaints,
   applications,
   financialRecords,
+  courses,
+  courseModules,
+  courseContents,
+  enrollments,
+  elections,
+  electionPositions,
+  electionCandidates,
+  votes,
+  chatRooms,
+  chatParticipants,
+  chatMessages,
+  memberTools,
+  memberCredits,
+  creditTransactions,
+  toolUsageLogs,
   type User, 
   type InsertUser,
   type Profile,
@@ -22,7 +37,37 @@ import {
   type Application,
   type InsertApplication,
   type FinancialRecord,
-  type InsertFinancialRecord
+  type InsertFinancialRecord,
+  type Course,
+  type InsertCourse,
+  type CourseModule,
+  type InsertCourseModule,
+  type CourseContent,
+  type InsertCourseContent,
+  type Enrollment,
+  type InsertEnrollment,
+  type Election,
+  type InsertElection,
+  type ElectionPosition,
+  type InsertElectionPosition,
+  type ElectionCandidate,
+  type InsertElectionCandidate,
+  type Vote,
+  type InsertVote,
+  type ChatRoom,
+  type InsertChatRoom,
+  type ChatParticipant,
+  type InsertChatParticipant,
+  type ChatMessage,
+  type InsertChatMessage,
+  type MemberTool,
+  type InsertMemberTool,
+  type MemberCredit,
+  type InsertMemberCredit,
+  type CreditTransaction,
+  type InsertCreditTransaction,
+  type ToolUsageLog,
+  type InsertToolUsageLog
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, ilike, desc, sql } from "drizzle-orm";
@@ -82,6 +127,97 @@ export interface IStorage {
   // Financial Records
   getFinancialRecords(category?: string, limit?: number): Promise<FinancialRecord[]>;
   createFinancialRecord(record: InsertFinancialRecord): Promise<FinancialRecord>;
+  
+  // E-Learning Platform
+  // Courses
+  getCourses(status?: string, instructorId?: number): Promise<Course[]>;
+  getCourseById(id: number): Promise<Course | undefined>;
+  createCourse(course: InsertCourse): Promise<Course>;
+  updateCourse(id: number, data: Partial<Course>): Promise<Course | undefined>;
+  deleteCourse(id: number): Promise<boolean>;
+  
+  // Course Modules
+  getCourseModules(courseId: number): Promise<CourseModule[]>;
+  getCourseModuleById(id: number): Promise<CourseModule | undefined>;
+  createCourseModule(module: InsertCourseModule): Promise<CourseModule>;
+  updateCourseModule(id: number, data: Partial<CourseModule>): Promise<CourseModule | undefined>;
+  deleteCourseModule(id: number): Promise<boolean>;
+  
+  // Course Contents
+  getCourseContents(moduleId: number): Promise<CourseContent[]>;
+  getCourseContentById(id: number): Promise<CourseContent | undefined>;
+  createCourseContent(content: InsertCourseContent): Promise<CourseContent>;
+  updateCourseContent(id: number, data: Partial<CourseContent>): Promise<CourseContent | undefined>;
+  deleteCourseContent(id: number): Promise<boolean>;
+  
+  // Enrollments
+  getUserEnrollments(userId: number): Promise<Enrollment[]>;
+  getCourseEnrollments(courseId: number): Promise<Enrollment[]>;
+  enrollUserInCourse(enrollment: InsertEnrollment): Promise<Enrollment>;
+  updateEnrollmentStatus(id: number, status: string): Promise<Enrollment | undefined>;
+  updateEnrollmentProgress(id: number, progress: number): Promise<Enrollment | undefined>;
+  unenrollUser(userId: number, courseId: number): Promise<boolean>;
+  
+  // Elections System
+  // Elections
+  getElections(isActive?: boolean): Promise<Election[]>;
+  getElectionById(id: number): Promise<Election | undefined>;
+  createElection(election: InsertElection): Promise<Election>;
+  updateElection(id: number, data: Partial<Election>): Promise<Election | undefined>;
+  activateElection(id: number): Promise<Election | undefined>;
+  endElection(id: number): Promise<Election | undefined>;
+  
+  // Election Positions
+  getElectionPositions(electionId: number): Promise<ElectionPosition[]>;
+  getElectionPositionById(id: number): Promise<ElectionPosition | undefined>;
+  createElectionPosition(position: InsertElectionPosition): Promise<ElectionPosition>;
+  updateElectionPosition(id: number, data: Partial<ElectionPosition>): Promise<ElectionPosition | undefined>;
+  
+  // Election Candidates
+  getElectionCandidates(positionId: number): Promise<ElectionCandidate[]>;
+  getCandidateById(id: number): Promise<ElectionCandidate | undefined>;
+  registerAsCandidate(candidate: InsertElectionCandidate): Promise<ElectionCandidate>;
+  approveCandidate(id: number): Promise<ElectionCandidate | undefined>;
+  withdrawCandidacy(id: number): Promise<boolean>;
+  
+  // Votes
+  castVote(vote: InsertVote): Promise<Vote>;
+  getUserVotes(electionId: number, voterId: number): Promise<Vote[]>;
+  getCandidateVotes(electionId: number, candidateId: number): Promise<number>;
+  getElectionResults(electionId: number): Promise<{position: ElectionPosition, candidates: {candidate: ElectionCandidate, votes: number}[]}[]>;
+  
+  // Chat & Communication
+  // Chat Rooms
+  getChatRooms(userId: number): Promise<ChatRoom[]>;
+  getChatRoomById(id: number): Promise<ChatRoom | undefined>;
+  createChatRoom(room: InsertChatRoom): Promise<ChatRoom>;
+  addUserToChatRoom(participant: InsertChatParticipant): Promise<ChatParticipant>;
+  removeUserFromChatRoom(roomId: number, userId: number): Promise<boolean>;
+  
+  // Chat Messages
+  getChatMessages(roomId: number, limit?: number, before?: Date): Promise<ChatMessage[]>;
+  sendChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  
+  // Member Tools Access
+  // Tools
+  getAllTools(): Promise<MemberTool[]>;
+  getToolById(id: number): Promise<MemberTool | undefined>;
+  createTool(tool: InsertMemberTool): Promise<MemberTool>;
+  updateTool(id: number, data: Partial<MemberTool>): Promise<MemberTool | undefined>;
+  toggleToolAvailability(id: number): Promise<MemberTool | undefined>;
+  
+  // Credits
+  getMemberCredits(userId: number): Promise<MemberCredit | undefined>;
+  addCredits(userId: number, amount: number, paymentReference?: string): Promise<MemberCredit>;
+  deductCredits(userId: number, amount: number, toolId: number): Promise<MemberCredit | undefined>;
+  
+  // Transactions
+  getMemberTransactions(userId: number): Promise<CreditTransaction[]>;
+  
+  // Tool Usage
+  startToolUsage(log: InsertToolUsageLog): Promise<ToolUsageLog>;
+  endToolUsage(id: number): Promise<ToolUsageLog | undefined>;
+  getUserToolUsageHistory(userId: number): Promise<ToolUsageLog[]>;
   
   // Session store
   sessionStore: any;
