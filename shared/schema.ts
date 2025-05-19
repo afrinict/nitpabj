@@ -18,13 +18,16 @@ import { z } from "zod";
 import { relations } from "drizzle-orm";
 
 // Enums
-export const userRoleEnum = pgEnum('user_role', ['member', 'admin', 'financial_officer', 'ethics_officer', 'executive']);
+export const userRoleEnum = pgEnum('user_role', ['member', 'admin', 'financial_officer', 'ethics_officer', 'executive', 'instructor']);
 export const memberGradeEnum = pgEnum('membership_grade', ['associate', 'graduate', 'corporate', 'fellow']);
 export const complaintStatusEnum = pgEnum('complaint_status', ['received', 'under_investigation', 'resolved', 'closed']);
 export const applicationStatusEnum = pgEnum('application_status', ['draft', 'submitted', 'under_review', 'approved', 'rejected']);
 export const applicationTypeEnum = pgEnum('application_type', ['sar', 'eiar']);
 export const educationLevelEnum = pgEnum('education_level', ['secondary', 'higher']);
 export const genderEnum = pgEnum('gender', ['male', 'female', 'other']);
+export const courseStatusEnum = pgEnum('course_status', ['draft', 'published', 'archived']);
+export const contentTypeEnum = pgEnum('content_type', ['text', 'video', 'presentation', 'quiz', 'assignment']);
+export const enrollmentStatusEnum = pgEnum('enrollment_status', ['enrolled', 'completed', 'unenrolled']);
 
 // Users
 export const users = pgTable("users", {
