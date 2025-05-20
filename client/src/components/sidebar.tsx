@@ -21,6 +21,7 @@ import {
   CreditCard,
   MessageSquare,
   Share2,
+  FileSearch,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -67,6 +68,18 @@ export function Sidebar({ className }: SidebarProps) {
       title: "Applications",
       href: "/applications",
       icon: FileText,
+      subItems: [
+        {
+          title: "Site Analysis Report",
+          href: "/applications/site-analysis",
+          icon: FileSearch,
+        },
+        {
+          title: "Ecological Impact Assessment",
+          href: "/applications/ecological-impact",
+          icon: FileText,
+        }
+      ]
     },
     {
       title: "E-Learning",

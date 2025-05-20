@@ -1,58 +1,35 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useState, useRef } from "react";
+import { useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { Button } from "./button";
+import { Upload } from "lucide-react";
 
 interface FileUploadProps {
-  onFileSelect?: (file: File) => void;
-  accept?: string;
-  maxSize?: number; // in bytes
+  onUpload: (files: File[]) => void;
 }
 
-export function FileUpload({ onFileSelect, accept = "*", maxSize = 5 * 1024 * 1024 }: FileUploadProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [error, setError] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export function FileUpload({ onUpload }: FileUploadProps) {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    onUpload(acceptedFiles);
+  }, [onUpload]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    setError("");
-
-    if (!file) {
-      return;
-    }
-
-    if (file.size > maxSize) {
-      setError(`File size must be less than ${maxSize / (1024 * 1024)}MB`);
-      return;
-    }
-
-    setSelectedFile(file);
-    onFileSelect?.(file);
-  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Input
-          ref={fileInputRef}
-          type="file"
-          onChange={handleFileChange}
-          accept={accept}
-          className="flex-1"
-        />
-        <Button
-          variant="outline"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          Browse
-        </Button>
-      </div>
-      {selectedFile && (
-        <p className="text-sm text-gray-500">
-          Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)}KB)
-        </p>
-      )}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+    <div
+      {...getRootProps()}
+      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
+        ${isDragActive ? "border-primary bg-primary/10" : "border-muted-foreground/25 hover:border-primary"}`}
+    >
+      <input {...getInputProps()} />
+      <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+      <p className="mt-2 text-sm text-muted-foreground">
+        {isDragActive
+          ? "Drop the files here..."
+          : "Drag and drop files here, or click to select files"}
+      </p>
+      <Button variant="outline" className="mt-4">
+        Select Files
+      </Button>
     </div>
   );
 } 

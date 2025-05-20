@@ -23,6 +23,9 @@ import Tools from './pages/Tools';
 import Subscription from './pages/Subscription';
 import Chat from './pages/Chat';
 import Social from './pages/Social';
+import { SiteAnalysisReport } from './pages/SiteAnalysisReport';
+import EcologicalImpactReport from '@/pages/EcologicalImpactReport';
+import EnrollmentForm from './pages/EnrollmentForm';
 
 const queryClient = new QueryClient();
 
@@ -63,6 +66,16 @@ function App() {
                 <Applications />
               </DashboardLayout>
             } />
+            <Route path="/applications/site-analysis" element={
+              <DashboardLayout>
+                <SiteAnalysisReport />
+              </DashboardLayout>
+            } />
+            <Route path="/applications/ecological-impact" element={
+              <DashboardLayout>
+                <EcologicalImpactReport />
+              </DashboardLayout>
+            } />
             <Route path="/profile" element={
               <DashboardLayout>
                 <MyProfile />
@@ -76,6 +89,11 @@ function App() {
             <Route path="/elearning/course/:courseId" element={
               <DashboardLayout>
                 <CourseDetails />
+              </DashboardLayout>
+            } />
+            <Route path="/enroll" element={
+              <DashboardLayout>
+                <EnrollmentForm />
               </DashboardLayout>
             } />
             <Route path="/election" element={
