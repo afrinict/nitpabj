@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Set default database URL if not provided
-process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://nigeriaplannerhub_owner:npg_Defx9HTncUm6@ep-still-moon-abuspdyc-pooler.eu-west-2.aws.neon.tech/nigeriaplannerhub?sslmode=require';
+process.env.DATABASE_URL = 'postgresql://nigeriaplannerhub_owner:npg_Defx9HTncUm6@ep-still-moon-abuspdyc-pooler.eu-west-2.aws.neon.tech/nigeriaplannerhub?sslmode=require';
 
 app.use((req, res, next) => {
   const start = Date.now();

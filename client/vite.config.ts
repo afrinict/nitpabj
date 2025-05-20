@@ -5,12 +5,17 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  root: './',
+  publicDir: 'public',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    assetsDir: 'assets',
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
