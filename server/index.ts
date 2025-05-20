@@ -10,13 +10,16 @@ const app = express();
 // Enable CORS with credentials
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? 'https://your-production-domain.com' 
-    : 'http://localhost:3050',
+    ? process.env.FRONTEND_URL || 'https://nitpabj.vercel.app'
+    : 'http://localhost:5173',
   credentials: true
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Set default database URL if not provided
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://nigeriaplannerhub_owner:npg_Defx9HTncUm6@ep-still-moon-abuspdyc-pooler.eu-west-2.aws.neon.tech/nigeriaplannerhub?sslmode=require';
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -65,6 +68,11 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Add health check endpoint
+  app.get('/api/health', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok' });
+  });
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
@@ -74,10 +82,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 3050
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 3050;
+  // Use Railway's PORT or fallback to 3050
+  const port = process.env.PORT || 3050;
   server.listen(port, () => {
     log(`serving on port ${port}`);
   });
