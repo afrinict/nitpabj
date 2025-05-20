@@ -82,8 +82,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use Railway's PORT or fallback to 80
-  const port = process.env.PORT || 80;
+  // Use Railway's PORT or fallback to 3070
+  const port = process.env.PORT || 3070;
   server.listen(port, () => {
     log(`serving on port ${port}`);
   });
