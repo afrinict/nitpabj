@@ -55,7 +55,7 @@ export default function MembersDirectory() {
         <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2">
           <Input
             type="search"
-            placeholder="Search members..."
+            placeholder="Search by name, membership ID, username or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full"

@@ -10,7 +10,19 @@ import {
   insertEmploymentSchema,
   insertComplaintSchema,
   insertApplicationSchema,
-  insertFinancialRecordSchema
+  insertFinancialRecordSchema,
+  insertCourseSchema,
+  insertCourseModuleSchema,
+  insertCourseContentSchema,
+  insertEnrollmentSchema,
+  insertElectionSchema, 
+  insertElectionPositionSchema,
+  insertElectionCandidateSchema,
+  insertVoteSchema,
+  insertChatRoomSchema,
+  insertChatMessageSchema,
+  insertMemberToolSchema,
+  insertToolUsageLogSchema
 } from "@shared/schema";
 
 // Auth middleware
@@ -383,6 +395,201 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.message });
       }
       res.status(500).json({ message: "Error creating financial record" });
+    }
+  });
+
+  // Elections
+  app.get("/api/elections", isAuthenticated, async (req, res) => {
+    try {
+      const isActive = req.query.isActive === 'true';
+      const elections = await storage.getElections(isActive);
+      res.json(elections);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching elections" });
+    }
+  });
+
+  app.get("/api/elections/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const election = await storage.getElectionById(id);
+      if (!election) {
+        return res.status(404).json({ message: "Election not found" });
+      }
+      res.json(election);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching election" });
+    }
+  });
+
+  app.post("/api/elections", hasRole(['admin']), async (req, res) => {
+    try {
+      const data = insertElectionSchema.parse(req.body);
+      const election = await storage.createElection(data);
+      res.status(201).json(election);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      res.status(500).json({ message: "Error creating election" });
+    }
+  });
+
+  app.put("/api/elections/:id", hasRole(['admin']), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertElectionSchema.partial().parse(req.body);
+      const election = await storage.updateElection(id, data);
+      if (!election) {
+        return res.status(404).json({ message: "Election not found" });
+      }
+      res.json(election);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      res.status(500).json({ message: "Error updating election" });
+    }
+  });
+
+  app.post("/api/elections/:id/activate", hasRole(['admin']), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const election = await storage.activateElection(id);
+      if (!election) {
+        return res.status(404).json({ message: "Election not found" });
+      }
+      res.json(election);
+    } catch (error) {
+      res.status(500).json({ message: "Error activating election" });
+    }
+  });
+
+  app.post("/api/elections/:id/end", hasRole(['admin']), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const election = await storage.endElection(id);
+      if (!election) {
+        return res.status(404).json({ message: "Election not found" });
+      }
+      res.json(election);
+    } catch (error) {
+      res.status(500).json({ message: "Error ending election" });
+    }
+  });
+
+  // Election Positions
+  app.get("/api/elections/:electionId/positions", isAuthenticated, async (req, res) => {
+    try {
+      const electionId = parseInt(req.params.electionId);
+      const positions = await storage.getElectionPositions(electionId);
+      res.json(positions);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching election positions" });
+    }
+  });
+
+  app.post("/api/elections/:electionId/positions", hasRole(['admin']), async (req, res) => {
+    try {
+      const electionId = parseInt(req.params.electionId);
+      const data = insertElectionPositionSchema.parse({
+        ...req.body,
+        electionId
+      });
+      const position = await storage.createElectionPosition(data);
+      res.status(201).json(position);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      res.status(500).json({ message: "Error creating election position" });
+    }
+  });
+
+  // Election Candidates
+  app.get("/api/positions/:positionId/candidates", isAuthenticated, async (req, res) => {
+    try {
+      const positionId = parseInt(req.params.positionId);
+      const candidates = await storage.getElectionCandidates(positionId);
+      res.json(candidates);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching candidates" });
+    }
+  });
+
+  app.post("/api/positions/:positionId/candidates", isAuthenticated, async (req, res) => {
+    try {
+      const positionId = parseInt(req.params.positionId);
+      const data = insertElectionCandidateSchema.parse({
+        ...req.body,
+        positionId,
+        userId: req.user!.id
+      });
+      const candidate = await storage.registerAsCandidate(data);
+      res.status(201).json(candidate);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      res.status(500).json({ message: "Error registering candidate" });
+    }
+  });
+
+  app.post("/api/candidates/:id/approve", hasRole(['admin']), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const candidate = await storage.approveCandidate(id);
+      if (!candidate) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+      res.json(candidate);
+    } catch (error) {
+      res.status(500).json({ message: "Error approving candidate" });
+    }
+  });
+
+  app.delete("/api/candidates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.withdrawCandidacy(id);
+      if (!success) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Error withdrawing candidacy" });
+    }
+  });
+
+  // Votes
+  app.post("/api/votes", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertVoteSchema.parse({
+        ...req.body,
+        voterId: req.user!.id
+      });
+      const vote = await storage.castVote(data);
+      res.status(201).json(vote);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      res.status(500).json({ message: "Error casting vote" });
+    }
+  });
+
+  app.get("/api/elections/:electionId/results", isAuthenticated, async (req, res) => {
+    try {
+      const electionId = parseInt(req.params.id);
+      const results = await storage.getElectionResults(electionId);
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching election results" });
     }
   });
 

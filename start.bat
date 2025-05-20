@@ -1,0 +1,6 @@
+@echo off
+echo Starting server...
+start cmd /k "set NODE_ENV=development && set DATABASE_URL=postgres://postgres:Samolan123@localhost:5456/nigeriaplannerhub && npx tsx server/index.ts"
+timeout /t 5
+echo Starting client...
+start cmd /k "cd client && npm run dev" 

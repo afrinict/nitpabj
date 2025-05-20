@@ -297,7 +297,12 @@ export class DatabaseStorage implements IStorage {
     
     if (search) {
       query = query.where(
-        sql`${users.firstName} || ' ' || ${users.lastName} ILIKE ${`%${search}%`}`
+        sql`(
+          ${users.firstName} || ' ' || ${users.lastName} ILIKE ${`%${search}%`} OR
+          ${users.membershipNumber} ILIKE ${`%${search}%`} OR
+          ${users.username} ILIKE ${`%${search}%`} OR
+          ${users.email} ILIKE ${`%${search}%`}
+        )`
       );
     }
     

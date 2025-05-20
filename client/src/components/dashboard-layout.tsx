@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
+import { TopNav } from "@/components/top-nav";
+import { AuthProvider } from "@/hooks/use-auth";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -25,18 +27,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar />
-      <MobileNav />
-      
-      <main 
-        className="flex-1 overflow-y-auto md:pt-0 pt-16 pb-16 md:pb-0"
-        style={{ paddingBottom: `${scrollPadding}px` }}
-      >
-        <div className="px-4 py-6 md:px-8 max-w-7xl mx-auto">
-          {children}
+    <AuthProvider>
+      <div className="flex h-screen overflow-hidden bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <TopNav />
+          <MobileNav />
+          <main 
+            className="flex-1 overflow-y-auto md:pt-0 pt-16 pb-16 md:pb-0"
+            style={{ paddingBottom: `${scrollPadding}px` }}
+          >
+            <div className="px-4 py-6 md:px-8 max-w-7xl mx-auto">
+              {children}
+            </div>
+          </main>
         </div>
-      </main>
-    </div>
+      </div>
+    </AuthProvider>
   );
 }

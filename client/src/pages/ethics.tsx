@@ -1,268 +1,201 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Complaint } from "@shared/schema";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { PageHeader } from "@/components/page-header";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/use-auth";
-import { ComplaintForm } from "@/components/complaint-form";
-import { getStatusColor, formatDate } from "@/lib/utils";
-import { FileText, AlertTriangle, Clock, CheckCircle, Loader2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default function Ethics() {
-  const { user } = useAuth();
-  const [complaintDialogOpen, setComplaintDialogOpen] = useState(false);
-  
-  // Fetch user's complaints if logged in
-  const { data: userComplaints, isLoading: userComplaintsLoading } = useQuery<Complaint[]>({
-    queryKey: ["/api/complaints/user"],
-    enabled: !!user,
-  });
-  
-  // Fetch all complaints if user is admin or ethics officer
-  const isEthicsAdmin = user && (user.role === "admin" || user.role === "ethics_officer");
-  const { data: allComplaints, isLoading: allComplaintsLoading } = useQuery<Complaint[]>({
-    queryKey: ["/api/complaints"],
-    enabled: !!isEthicsAdmin,
-  });
+interface Complaint {
+  id: string;
+  subject: string;
+  status: 'pending' | 'under_review' | 'resolved' | 'appealed';
+  date: string;
+  handler: string;
+}
+
+export function Ethics() {
+  const [activeTab, setActiveTab] = useState("code");
+  const [complaints, setComplaints] = useState<Complaint[]>([
+    {
+      id: "1",
+      subject: "Professional Misconduct Complaint",
+      status: "under_review",
+      date: "2024-03-15",
+      handler: "Ethics Committee Chair"
+    }
+  ]);
+
+  const handleComplaintSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle complaint submission
+    console.log("Complaint submitted");
+  };
 
   return (
-    <DashboardLayout>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <PageHeader
-          title="Ethics"
-          description="Report and manage ethics issues within the organization."
-          className="mb-0"
-        />
-        <Dialog open={complaintDialogOpen} onOpenChange={setComplaintDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-[#1E5631] hover:bg-[#154525] mt-4 sm:mt-0">
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Report Ethics Issue
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Submit Ethics Complaint</DialogTitle>
-              <DialogDescription>
-                File a complaint against a member, executive, or the organization.
-                All complaints are kept confidential.
-              </DialogDescription>
-            </DialogHeader>
-            <ComplaintForm onSuccess={() => setComplaintDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Ethics Module</h1>
+      
+      <Tabs defaultValue="code" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="code">Code of Ethics</TabsTrigger>
+          <TabsTrigger value="complaint">Submit Complaint</TabsTrigger>
+          <TabsTrigger value="procedures">Procedures</TabsTrigger>
+          <TabsTrigger value="status">Complaint Status</TabsTrigger>
+        </TabsList>
 
-      {isEthicsAdmin ? (
-        <Tabs defaultValue="all" className="mb-8">
-          <TabsList className="w-full max-w-md grid grid-cols-4 mb-6">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="received">Received</TabsTrigger>
-            <TabsTrigger value="investigating">Investigating</TabsTrigger>
-            <TabsTrigger value="closed">Closed/Resolved</TabsTrigger>
-          </TabsList>
-          <TabsContent value="all">
-            <AdminComplaintsList complaints={allComplaints} isLoading={allComplaintsLoading} />
-          </TabsContent>
-          <TabsContent value="received">
-            <AdminComplaintsList 
-              complaints={allComplaints?.filter(c => c.status === "received")} 
-              isLoading={allComplaintsLoading} 
-            />
-          </TabsContent>
-          <TabsContent value="investigating">
-            <AdminComplaintsList 
-              complaints={allComplaints?.filter(c => c.status === "under_investigation")} 
-              isLoading={allComplaintsLoading} 
-            />
-          </TabsContent>
-          <TabsContent value="closed">
-            <AdminComplaintsList 
-              complaints={allComplaints?.filter(c => c.status === "resolved" || c.status === "closed")} 
-              isLoading={allComplaintsLoading} 
-            />
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <>
-          <Card className="mb-6 bg-[#f8fdf9] border-[#d1e7dd]">
-            <CardContent className="pt-6">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 bg-[#3D8361] p-2 rounded-full text-white">
-                  <AlertTriangle className="h-5 w-5" />
+        <TabsContent value="code">
+          <Card>
+            <CardHeader>
+              <CardTitle>Code of Ethics</CardTitle>
+              <CardDescription>
+                The official Code of Ethics for the Nigerian Institute of Town Planners
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[600px] rounded-md border p-4">
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">1. Professional Conduct</h2>
+                  <p>Members shall maintain the highest standards of professional conduct and integrity.</p>
+                  
+                  <h2 className="text-xl font-semibold">2. Public Interest</h2>
+                  <p>Members shall prioritize the public interest in all professional activities.</p>
+                  
+                  <h2 className="text-xl font-semibold">3. Professional Competence</h2>
+                  <p>Members shall maintain and enhance their professional competence.</p>
+                  
+                  {/* Add more sections as needed */}
                 </div>
-                <div className="ml-4">
-                  <h3 className="font-medium text-[#1E5631]">Reporting Ethics Issues</h3>
-                  <p className="text-sm mt-1">
-                    The Nigeria Institute of Town Planners is committed to maintaining the highest ethical standards.
-                    If you've witnessed or experienced unethical behavior, please submit a confidential report.
-                  </p>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="complaint">
+          <Card>
+            <CardHeader>
+              <CardTitle>Submit a Complaint</CardTitle>
+              <CardDescription>
+                Submit a confidential complaint regarding potential ethical violations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleComplaintSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject of Complaint</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="member">Against a Member</SelectItem>
+                      <SelectItem value="organization">Against the Organization</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="details">Details of Complaint</Label>
+                  <Textarea
+                    id="details"
+                    placeholder="Please provide a detailed description of the issue..."
+                    className="min-h-[200px]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="files">Supporting Documents</Label>
+                  <Input
+                    id="files"
+                    type="file"
+                    multiple
+                    className="cursor-pointer"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="name">Your Name</Label>
+                  <Input id="name" type="text" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contact">Contact Information</Label>
+                  <Input id="contact" type="email" placeholder="email@example.com" />
+                </div>
+
+                <Button type="submit" className="w-full">Submit Complaint</Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="procedures">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ethics Procedures</CardTitle>
+              <CardDescription>
+                Information about the complaint process and procedures
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Filing a Complaint</h3>
+                  <p>Learn about the process of filing an ethical complaint and what information is required.</p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Investigation Process</h3>
+                  <p>Understand how complaints are investigated and the timeline for resolution.</p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Resolution Process</h3>
+                  <p>Information about how complaints are resolved and potential outcomes.</p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Appeals Process</h3>
+                  <p>Details about the appeals process and how to submit an appeal.</p>
                 </div>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          <h3 className="font-heading text-xl font-semibold text-[#1E5631] mb-4">Your Complaints</h3>
-          
-          {userComplaintsLoading ? (
-            <div className="flex justify-center items-center h-32">
-              <Loader2 className="h-8 w-8 animate-spin text-[#1E5631]" />
-            </div>
-          ) : !userComplaints || userComplaints.length === 0 ? (
-            <Card className="border border-neutral-200">
-              <CardContent className="pt-6 text-center">
-                <FileText className="h-12 w-12 text-neutral-300 mx-auto mb-2" />
-                <p className="text-neutral-600">You haven't submitted any ethics complaints</p>
-                <Button
-                  variant="link"
-                  onClick={() => setComplaintDialogOpen(true)}
-                  className="mt-2 text-[#3D8361]"
-                >
-                  Submit a complaint
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {userComplaints.map((complaint) => (
-                <UserComplaintCard key={complaint.id} complaint={complaint} />
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </DashboardLayout>
-  );
-}
-
-function UserComplaintCard({ complaint }: { complaint: Complaint }) {
-  const statusColors = {
-    received: "bg-blue-100 text-blue-800",
-    under_investigation: "bg-yellow-100 text-yellow-800",
-    resolved: "bg-green-100 text-green-800",
-    closed: "bg-gray-100 text-gray-800"
-  };
-  
-  const statusLabels = {
-    received: "Received",
-    under_investigation: "Under Investigation",
-    resolved: "Resolved",
-    closed: "Closed"
-  };
-
-  return (
-    <Card className="border border-neutral-200 hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle>{complaint.subject}</CardTitle>
-          <Badge className={statusColors[complaint.status as keyof typeof statusColors]}>
-            {statusLabels[complaint.status as keyof typeof statusLabels]}
-          </Badge>
-        </div>
-        <CardDescription>
-          Submitted on {formatDate(complaint.createdAt)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm line-clamp-3">{complaint.details}</p>
-      </CardContent>
-      <CardFooter className="flex justify-between border-t pt-4">
-        <p className="text-xs text-neutral-500">
-          {complaint.status === "received" ? (
-            <>
-              <Clock className="h-3 w-3 inline mr-1" />
-              Waiting for review
-            </>
-          ) : complaint.status === "under_investigation" ? (
-            <>
-              <AlertTriangle className="h-3 w-3 inline mr-1" />
-              Under investigation
-            </>
-          ) : (
-            <>
-              <CheckCircle className="h-3 w-3 inline mr-1" />
-              Case {complaint.status}
-            </>
-          )}
-        </p>
-        <Button variant="ghost" size="sm" className="text-[#3D8361]">
-          View Details
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-}
-
-function AdminComplaintsList({ 
-  complaints, 
-  isLoading 
-}: { 
-  complaints?: Complaint[], 
-  isLoading: boolean 
-}) {
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-32">
-        <Loader2 className="h-8 w-8 animate-spin text-[#1E5631]" />
-      </div>
-    );
-  }
-
-  if (!complaints || complaints.length === 0) {
-    return (
-      <Card className="border border-neutral-200">
-        <CardContent className="pt-6 text-center">
-          <FileText className="h-12 w-12 text-neutral-300 mx-auto mb-2" />
-          <p className="text-neutral-600">No complaints found</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {complaints.map((complaint) => (
-        <Card key={complaint.id} className="border border-neutral-200 hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <div className="flex flex-wrap md:flex-nowrap justify-between items-start gap-4">
-              <div className="w-full md:w-3/4">
-                <div className="flex items-center mb-2">
-                  <Badge className={getStatusColor(complaint.status, 'complaint')}>
-                    {complaint.status.replace('_', ' ').toUpperCase()}
-                  </Badge>
-                  <span className="text-xs text-neutral-500 ml-2">
-                    ID: {complaint.id}
-                  </span>
-                </div>
-                <h3 className="font-medium text-lg">{complaint.subject}</h3>
-                <p className="text-sm text-neutral-600 mt-1 line-clamp-2">
-                  {complaint.details}
-                </p>
-                <div className="flex items-center mt-3 text-xs text-neutral-500">
-                  <Clock className="h-3 w-3 mr-1" />
-                  <span>Submitted on {formatDate(complaint.createdAt)}</span>
-                  {complaint.assignedOfficerId && (
-                    <span className="ml-4">Assigned to Officer #{complaint.assignedOfficerId}</span>
-                  )}
-                </div>
+        <TabsContent value="status">
+          <Card>
+            <CardHeader>
+              <CardTitle>Complaint Status</CardTitle>
+              <CardDescription>
+                Track the status of your submitted complaints
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {complaints.map((complaint) => (
+                  <Card key={complaint.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{complaint.subject}</h3>
+                          <p className="text-sm text-gray-500">Submitted: {complaint.date}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">Status: {complaint.status}</p>
+                          <p className="text-sm text-gray-500">Handler: {complaint.handler}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-              <div className="flex flex-col w-full md:w-1/4">
-                <Button className="mb-2 bg-[#3D8361] hover:bg-[#2F6649]">
-                  Assign Officer
-                </Button>
-                <Button variant="outline">
-                  View Details
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

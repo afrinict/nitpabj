@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,6 +15,12 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  BookOpen,
+  Vote,
+  Wrench,
+  CreditCard,
+  MessageSquare,
+  Share2,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -22,7 +28,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ className }: SidebarProps) {
-  const [location] = useLocation();
+  const location = useLocation();
   const { user, logoutMutation } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -33,7 +39,7 @@ export function Sidebar({ className }: SidebarProps) {
   const links = [
     {
       title: "Dashboard",
-      href: "/",
+      href: "/dashboard",
       icon: LayoutDashboard,
     },
     {
@@ -61,6 +67,36 @@ export function Sidebar({ className }: SidebarProps) {
       title: "Applications",
       href: "/applications",
       icon: FileText,
+    },
+    {
+      title: "E-Learning",
+      href: "/elearning",
+      icon: BookOpen,
+    },
+    {
+      title: "Election",
+      href: "/election",
+      icon: Vote,
+    },
+    {
+      title: "Chat",
+      href: "/chat",
+      icon: MessageSquare,
+    },
+    {
+      title: "Social Media",
+      href: "/social",
+      icon: Share2,
+    },
+    {
+      title: "Tools",
+      href: "/tools",
+      icon: Wrench,
+    },
+    {
+      title: "Subscription",
+      href: "/subscription",
+      icon: CreditCard,
     },
     {
       title: "My Profile",
@@ -109,12 +145,12 @@ export function Sidebar({ className }: SidebarProps) {
       <nav className="flex-1 overflow-y-auto py-4 px-2">
         <div className="space-y-1">
           {filteredLinks.map((link) => {
-            const isActive = location === link.href;
+            const isActive = location.pathname === link.href;
             const Icon = link.icon;
             return (
               <Link
                 key={link.href}
-                href={link.href}
+                to={link.href}
                 className={cn(
                   "flex items-center py-3 rounded-md group",
                   collapsed ? "justify-center px-3" : "px-4",
@@ -136,8 +172,8 @@ export function Sidebar({ className }: SidebarProps) {
           <Avatar className="h-8 w-8">
             <AvatarImage src="" />
             <AvatarFallback className="bg-[#3D8361] text-white">
-              {user?.firstName.charAt(0)}
-              {user?.lastName.charAt(0)}
+              {user?.firstName?.[0]}
+              {user?.lastName?.[0]}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
@@ -146,7 +182,7 @@ export function Sidebar({ className }: SidebarProps) {
                 {user?.firstName} {user?.lastName}
               </p>
               <p className="text-xs text-[#D8E9A8] truncate">
-                {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
+                {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''}
               </p>
             </div>
           )}
