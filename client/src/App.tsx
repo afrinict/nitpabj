@@ -9,7 +9,7 @@ import Dashboard from './pages/dashboard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MembersDirectory } from './pages/MembersDirectory';
 import { ExecutiveCommittee } from './pages/ExecutiveCommittee';
-import { Ethics } from './pages/Ethics';
+import { Ethics } from './pages/Ethics.tsx';
 import Applications from './pages/applications';
 import { Toaster } from 'sonner';
 import MyProfile from './pages/MyProfile';
