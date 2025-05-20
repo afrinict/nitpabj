@@ -1,0 +1,14 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm run start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
+
+[env]
+NODE_ENV = "production"
+DATABASE_URL = "postgresql://nigeriaplannerhub_owner:npg_Defx9HTncUm6@ep-still-moon-abuspdyc-pooler.eu-west-2.aws.neon.tech/nigeriaplannerhub?sslmode=require" 
